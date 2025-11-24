@@ -1,0 +1,643 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4.Identyfikacja_zmiennosci</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h1 id="genomika-202526">Genomika 2025/26</h1>
+<h1 id="identyfikacja-zmienności-genetycznej">Identyfikacja zmienności genetycznej</h1>
+<hr>
+<h2 id="wprowadzenie">Wprowadzenie</h2>
+<p>Dotychczas w naszych analizach genomicznych skupialiśmy się na składaniu i adnotacji pojedynczego genomu. Chociaż analiza pojedynczego genomu pozwala na wnioskowanie na temat jego organizacji i funkcjonowania, prawdziwa siła genomiki tkwi w porównywaniu genomów różnych osobników, populacji czy gatunków. Identyfikacja różnic w sekwencjach DNA umożliwia badanie dynamiki i ewolucji genomów oraz zrozumienie, w jaki sposób zmienność genetyczna jest powiązana z cechami fenotypowymi, zarówno na poziomie molekularnym (np. powinowactwo do ligandu), jak i wyższych poziomach organizacji życia. Wiedza ta, w praktyce, może prowadzić m. in. do lepszego zrozumienia klinicznego znaczenia wariantów genetycznych, rozwoju diagnostyki molekularnej i medycyny spersonalizowanej, a także do poprawy plonowania i odporności na stres środowiskowy u roślin użytkowych oraz walki z antybiotykoopornością u bakterii. Identyfikacja różnic genetycznych pozwala także na badanie dynamiki populacji i monitorowanie procesów ewolucyjnych na poziomie pojedynczego organizmu, populacji i gatunków, również w kontekście monitoringu epidemiologicznego.</p>
+<p>Na pierwszych zajęciach zapoznaliśmy się z metodą identyfikacji wariantów opartą na porównaniu całych genomów. Alternatywnym, często stosowanym podejściem, które nie wymaga składania genomu, jest wykorzystanie odczytów do identyfikacji wariantów względem genomu referencyjnego, potocznie określane jako “Variant calling”.</p>
+<hr>
+<h2 id="cel-zajęć">Cel zajęć</h2>
+<p>Celem zajęć jest zapoznanie uczestników z metodami identyfikacji wariantów genetycznych na podstawie danych z sekwencjonowania drugiej i trzeciej generacji, a także kontroli jakości, filtrowania i adnotacji uzyskanych danych.</p>
+<hr>
+<h2 id="identyfikacja-wariantów">Identyfikacja wariantów</h2>
+<h3 id="małe-warianty">Małe warianty</h3>
+<h4 id="snv---single-nucleotide-variant--snp---single-nucleotide-polymorphism">SNV - Single Nucleotide Variant / SNP - Single Nucleotide Polymorphism</h4>
+<p>SNP/SNV to warianty, w których jedna zasada w sekwencji DNA została zastąpiona inną. Terminologia związana z SNP i SNV nie jest do końca ujednolicona i często zależy od kontekstu lub preferencji badacza. Przykładowo, w kontekście populacyjnym o SNP mówi się, gdy częstość występowania wariantu w populacji przekracza pewien pułap, z reguły 1%. Część badaczy terminem “SNP” określa warianty dziedziczne, a “SNV” somatyczne. W rzeczywistości jednak te pojęcia stosowane są zamiennie i tak naprawdę <a href="http://lh3.github.io/2021/03/15/snp-vs-snv">nie ma konsensusu odnośnie definicji</a>.</p>
+<p>Przykład SNV/SNP:</p>
+<pre><code>ACGTTTGCATATTTCTTACG 
+ACGTTTGCATATTTGTTACG
+              ^
+</code></pre>
+<p>W literaturze i wśród niektórych narzędzi funkcjonuje również pojęcie MNV (MNP), odnoszące się do złożonej “substytucji”, obejmującej więcej niż jeden nukleotyd:</p>
+<pre><code>ACGTTTGCATATTTCTTACG 
+ACGTTTGCATATTTGATACG
+              ^^ 
+</code></pre>
+<p><strong>Pytanie:</strong> Jakie mogą być biologiczne skutki SNV?</p>
+<hr>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Genetic_Code.png/624px-Genetic_Code.png?20180815152224" alt="enter image description here"></p>
+<p><em><a href="https://commons.wikimedia.org/wiki/File:Genetic_Code.png">https://commons.wikimedia.org/wiki/File:Genetic_Code.png</a></em></p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Point_mutations-en.png/800px-Point_mutations-en.png?20101230132301" alt="enter image description here"></p>
+<p><em><a href="https://commons.wikimedia.org/wiki/File:Point_mutations-en.png">https://commons.wikimedia.org/wiki/File:Point_mutations-en.png</a></em></p>
+<hr>
+<h4 id="insercje-i-delecje-indele">Insercje i Delecje (Indele)</h4>
+<p>Umownie do małych wariantów zaliczamy również insercje i delecje krótsze niż 50 bp, które mogą być identyfikowane w obrębie jednego odczytu przez narzędzia identyfikujące małe warianty.</p>
+<p>Przykład insercji:</p>
+<pre><code>ACGTTTGCATATTT-TTACG (referencja)
+ACGTTTGCATATTTGTTACG (próba)
+              ^
+</code></pre>
+<p>Przykład delecji:</p>
+<pre><code>ACGTTTGCATATTTGTTACG (referencja)
+ACGTTTGCATATTT-TTACG (próba)
+              ^
+</code></pre>
+<blockquote>
+<p><strong>Uwaga:</strong> Warto pamiętać, że insercje i delecje interpretujemy względem genomu referencyjnego. Aby określić rzeczywisty kierunek zmiany, musimy ustalić, który z alleli jest ancestralny.</p>
+</blockquote>
+<p><strong>Pytanie:</strong> Jakie skutki mogą nieść ze sobą indele?</p>
+<hr>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Frameshift_mutations_%2813080927393%29.jpg/800px-Frameshift_mutations_%2813080927393%29.jpg?20160807230246" alt="enter image description here"></p>
+<p><em><a href="https://commons.wikimedia.org/wiki/File:Frameshift_mutations_(13080927393).jpg">https://commons.wikimedia.org/wiki/File:Frameshift_mutations_(13080927393).jpg</a></em></p>
+<hr>
+<h4 id="przykład-1">Przykład 1</h4>
+<h5 id="symulacja-genomu-i-odczytów">Symulacja genomu i odczytów</h5>
+<p><strong>1. Generowanie genomu referencyjnego</strong></p>
+<p>Wygenerujmy genom o długości 100000 bp, a następnie dodajmy powtórzenia tandemowe i rozproszone duplikacje, aby skomplikować jego strukturę. Następnie stwórzymy indeks przy użyciu <code>samtools</code>:</p>
+<pre><code>python simseq.py 100000 1 seq.fa
+python variantize.py seq.fa tdiisiitdsi &gt; temp &amp;&amp; mv temp seq.fa
+samtools faidx seq.fa
+</code></pre>
+<hr>
+<p><strong>2. Tworzenie diploidalnego genomu pochodnego</strong></p>
+<p>Stwórzmy diploidalny genom pochodny, który zawiera losowe małe warianty w układzie homo- i heterozygotycznym. Korzystając z <code>sed</code>, przypiszmy unikalne nazwy chromosomów, aby uniknąć problemów ze zduplikowanymi nazwami odczytów w dalszych krokach:</p>
+<pre><code>python variantize.py seq.fa isisisis &gt; seq_s1.fa 
+python variantize.py seq_s1.fa sisi &gt; seq_s2.fa
+sed -i 's,&gt;0,&gt;0_2,g' seq_s2.fa
+sed -i 's,&gt;1,&gt;1_2,g' seq_s2.fa 
+cat seq_s1.fa seq_s2.fa &gt; seq_s.fa
+</code></pre>
+<hr>
+<p><strong>3. Symulacja odczytów</strong></p>
+<p>Dokonajmy symulacji odczytów Illumina z następującymi parametrami: platforma HiSeqX, odczyty sparowane, długość odczytu 150 bp, średnia długość fragmentu 350 bp, odchylenie standardowe średniej długości fragmentu 10 bp, pokrycie 30x:</p>
+<pre><code>art_illumina -ss HSXt -sam -i seq_s.fa -p -l 150 -f 30 -m 350 -s 10 -o illumina_s
+</code></pre>
+<hr>
+<h5 id="mapowanie-odczytów-do-genomu-referencyjnego">Mapowanie odczytów do genomu referencyjnego</h5>
+<p>Przed mapowaniem odczytów należy upewnić się, że są one odpowiednio przetworzone (np. usunięte adaptery, przycięte lub usunięte odczyty o niskiej jakości). Następnie możemy przejść do mapowania za pomocą <code>bwa mem</code>, sortowania i indeksowania wynikowego pliku BAM. Podczas mapowania definiujemy grupy odczytów, które identyfikują źródło odczytów (np. z jakiej próby i przebiegu sekwencjonowania pochodzą). Grupy odczytów można dodać lub zmodyfikować po mapowaniu za pomocą narzędzi takich jak <code>samtools addreplacerg</code> lub <a href="https://broadinstitute.github.io/picard/">Picard</a> <code>AddOrReplaceReadGroups</code>. Więcej informacji na temat grup odczytów można znaleźć <a href="https://gatk.broadinstitute.org/hc/en-us/articles/360035890671-Read-groups">TUTAJ</a>:</p>
+<pre><code>bwa index seq.fa
+bwa mem -R '@RG\tID:1\tSM:1' -t 10 seq.fa illumina_s1.fq illumina_s2.fq|samtools sort &gt; illumina_s_bwa.bam &amp;&amp; samtools index illumina_s_bwa.bam
+</code></pre>
+<p>Obejrzyj zmapowane dane w IGV.</p>
+<hr>
+<h5 id="usuwanie-duplikatów">Usuwanie duplikatów</h5>
+<p>Aby uzyskać wiarygodne zliczenia częstości alleli, warto usunąć zduplikowane odczyty. Duplikaty mogą powstać na skutek zbyt dużej liczby cykli PCR lub jako duplikaty optyczne charakterystyczne dla platformy Illumina, gdzie jeden “rozlany” <a href="https://zackchiang.com/wp-content/uploads/2022/07/illumina_flowcell.gif">klaster</a> na komorze przepływowej jest błędnie interpretowany jako dwa. Duplikaty można usunąć za pomocą np. <code>samtools</code> lub <code>Picard MarkDuplicates</code>.</p>
+<pre><code># Porządkujemy odczyty po nazwach, aby poprawnie dopasować pary
+samtools sort -n illumina_s_bwa.bam &gt; illumina_namesort.bam  
+ 
+# Uzupełniamy brakujące informacje o położeniu pary oraz rozmiarze insertu
+samtools fixmate -m illumina_namesort.bam illumina_fixmate.bam 
+
+# Sortujemy odczyty po ich zmapowanej pozycji na genomie
+samtools sort illumina_fixmate.bam &gt; illumina_sorted.bam 
+
+# Oznaczamy duplikaty. Flaga -d definiuje maksymalny dystans do identyfikacji duplikatów optycznych
+samtools markdup -d 100 -r illumina_sorted.bam illumina_markdup.bam
+
+# Tworzymy indeks pliku BAM
+samtools index illumina_markdup.bam ### Index
+</code></pre>
+<hr>
+<h5 id="identyfikacja-wariantów-1">Identyfikacja wariantów</h5>
+<p><strong>1. Tworzenie pileupu</strong></p>
+<p>Zacznijmy od stworzenia <em><strong>pileupu</strong></em>, czyli stosu odczytów.  <a href="http://www.htslib.org/doc/samtools-mpileup.html">Struktura ta</a> zawiera informacje o dopasowaniu każdego odczytu do każdej pozycji sekwencji referencyjnej. Pierwsze trzy kolumny to: nazwa chromosomu, pozycja (1-based) oraz referencyjny nukleotyd. Kolejne zawierają dane dotyczące m. in. jakości zasad oraz samego pileupu, który jest ciągiem znaków definiującym stan każdego odczytu na danej pozycji:</p>
+
+<table>
+<thead>
+<tr>
+<th>Forward</th>
+<th>Reverse</th>
+<th>Znaczenie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>.</td>
+<td>,</td>
+<td>dopasowanie</td>
+</tr>
+<tr>
+<td>ACTGN</td>
+<td>actgn</td>
+<td>niedopasowanie</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>&lt;</td>
+<td>CIGAR “N” (intron)</td>
+</tr>
+<tr>
+<td>*</td>
+<td>*/#</td>
+<td>Delecja (CIGAR “D”)</td>
+</tr>
+</tbody>
+</table><p>Po insercjach i delecjach zapisane są ich długość i sekwencja, a początek i koniec odczytów oznaczone są symbolami ^ i $.</p>
+<p>Aby wygenerować pileup, skorzystamy z narzędzia <code>mpileup</code> w pakiecie <code>samtools</code>. Obecnie narzędzie to jest częścią <a href="https://samtools.github.io/bcftools/bcftools.html">bcftools</a> - zbioru narzędzi służących do identyfikacji i przetwarzania wariantów zapisanych w formacie VCF. Wersja w <code>bcftools</code> jest jednoznaczna z <code>samtools mpileup -v</code>(lub <code>-g</code>) zwracającą VCF z określonym prawdopodobieństwem poszczególnych genotypów. Na początku posłużymy się oryginalną wersją, która zwraca pileup w ilustratywnym formacie opisanym powyżej:</p>
+<pre><code>samtools mpileup -Q 5 -f seq.fa illumina_markdup.bam|less
+</code></pre>
+<blockquote>
+<p><code>-Q</code>: minimalna jakość nukleotydu, aby został uwzględniony w analizie.</p>
+</blockquote>
+<p>Obejrzyj wyniki pileup w zestawieniu ze zmapowanymi odczytami w <code>IGV</code>.</p>
+<hr>
+<p><strong>2. Identyfikacja wariantów</strong></p>
+<p>Na podstawie pileupu możemy dokonać identyfikacji wariantów, wykorzystując program <code>bcftools call</code>:</p>
+<pre><code>bcftools mpileup -f seq.fa illumina_markdup.bam|bcftools call -mv
+</code></pre>
+<hr>
+<p><strong>Zadanie</strong>:  Ile wariantów udało się zidentyfikować? Obejrzyj warianty w IGV.</p>
+<hr>
+<p>Wyjściowy plik w formacie <a href="https://samtools.github.io/hts-specs/VCFv4.5.pdf">VCF</a> (Variant Call Format) zawiera szczegóły dotyczące wariantów genetycznych. Każdy rekord definiuje jeden wariant, określając m. in. jego pozycję w genomie, allele referencyjny i alternatywne oraz jakość wariantu. Po bloku kolumn określających ogólne dane dotyczące wariantu znajduje się część zawierająca dane specyficzne dla konkretnych próbek. Rozpoczyna ją pole <code>FORMAT</code>, które definiuje rodzaj danych zapisanych dla próbek, takich jak genotyp (GT), głębokość pokrycia alleli (AD) i inne. Znaczenie poszczególnych tagów jest zazwyczaj wyjaśnione w nagłówku pliku. Każda kolumna poniżej pola <code>FORMAT</code><br>
+odpowiada konkretnej próbce i jest zapisana zgodnie z określonym formatem. Przykładowo, formatowi GT:AD mogłyby odpowiadać próbki 1/1:10,9 czy 1/0:12,1.</p>
+<hr>
+<p><img src="https://cdn.ncbi.nlm.nih.gov/pmc/blobs/3747/3137218/db6e4a2b7a6a/btr330f1.jpg" alt="enter image description here"></p>
+<p><em><a href="https://www.ncbi.nlm.nih.gov/labs/pmc/articles/PMC3137218/">https://www.ncbi.nlm.nih.gov/labs/pmc/articles/PMC3137218/</a></em></p>
+<hr>
+<h4 id="variant-calling-przy-pomocy-freebayes">Variant calling przy pomocy FreeBayes</h4>
+<p>Dotychczas opisane podejście do variant callingu wykorzystujące <code>bcftools</code> jest klasycznym rozwiązaniem. Obecnie jednak dostępne są narzędzia, które wykorzystują bardziej zaawansowane metody identyfikacji wariantów, takie jak <a href="https://gatk.broadinstitute.org/hc/en-us/articles/360037225632-HaplotypeCaller">GATK HaplotypeCaller</a>, <a href="https://github.com/google/deepvariant">DeepVariant</a> czy <a href="https://github.com/freebayes/freebayes">FreeBayes</a>, który wykorzystamy w dalszej części ćwiczenia.</p>
+<p>Freebayes wyróżnia się prostotą obsługi i dużą elastycznością. To narzędzie bazujące na podejściu bayesowskim, gdzie proces identyfikacji wariantów opiera się na równaniu:</p>
+<p><span class="katex--display"><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><mi>P</mi><mo stretchy="false">(</mo><mtext>Genotype</mtext><mo>∣</mo><mtext>Data</mtext><mo stretchy="false">)</mo><mo>=</mo><mfrac><mrow><mi>P</mi><mo stretchy="false">(</mo><mtext>Data</mtext><mo>∣</mo><mtext>Genotype</mtext><mo stretchy="false">)</mo><mi>P</mi><mo stretchy="false">(</mo><mtext>Genotype</mtext><mo stretchy="false">)</mo></mrow><mrow><mi>P</mi><mo stretchy="false">(</mo><mtext>Data</mtext><mo stretchy="false">)</mo></mrow></mfrac></mrow><annotation encoding="application/x-tex">
+P(\text{Genotype} \mid \text{Data}) = \frac{P(\text{Data} \mid \text{Genotype}) P(\text{Genotype})}{P(\text{Data})}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord mathnormal" style="margin-right: 0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">Genotype</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 1em; vertical-align: -0.25em;"></span><span class="mord text"><span class="mord">Data</span></span><span class="mclose">)</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right: 0.277778em;"></span></span><span class="base"><span class="strut" style="height: 2.363em; vertical-align: -0.936em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height: 1.427em;"><span class="" style="top: -2.314em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">Data</span></span><span class="mclose">)</span></span></span><span class="" style="top: -3.23em;"><span class="pstrut" style="height: 3em;"></span><span class="frac-line" style="border-bottom-width: 0.04em;"></span></span><span class="" style="top: -3.677em;"><span class="pstrut" style="height: 3em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right: 0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">Data</span></span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mrel">∣</span><span class="mspace" style="margin-right: 0.277778em;"></span><span class="mord text"><span class="mord">Genotype</span></span><span class="mclose">)</span><span class="mord mathnormal" style="margin-right: 0.13889em;">P</span><span class="mopen">(</span><span class="mord text"><span class="mord">Genotype</span></span><span class="mclose">)</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height: 0.936em;"><span class=""></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></span></p>
+<p>Gdzie:</p>
+<ul>
+<li>P(Genotype∣Data) to prawdopodobieństwo <em>a posteriori</em>, czyli prawdopodobieństwo konkretnego genotypu, uwzględniające obserwowane dane (odczyty z sekwencjonowania).</li>
+<li>P(Genotyp) to prawdopodobieństwo <em>a priori</em>, które uwzględnia wcześniejsze informacje o rozkładzie genotypów (np. ploidalność organizmu) oraz możliwe błędy i artefakty sekwencjonowania.</li>
+<li>P(Dane | Genotyp) to prawdopodobieństwo danych (odczytów) dla określonego genotypu — tzw. likelihood.</li>
+</ul>
+<p>Więcej informacji na temat FreeBayes: <a href="https://ekg.github.io/2015/12/08/How-to-freebayes">https://ekg.github.io/2015/12/08/How-to-freebayes</a></p>
+<hr>
+<p><img src="http://ekg.github.io/assets/variant-calling-bias.png" alt="https://ekg.github.io/2015/12/08/How-to-freebayes"></p>
+<p><em><a href="https://ekg.github.io/2015/12/08/How-to-freebayes">https://ekg.github.io/2015/12/08/How-to-freebayes</a></em></p>
+<p>Zastosowanie takiego modelowania pozwala na osiągnięcie lepszej precyzji i czułości niż w przypadku <code>bcftools</code>, zwłaszcza w przypadku indeli:</p>
+<p><img src="https://github.com/freebayes/freebayes/blob/master/paper/100samples10x_0_25_both.png?raw=true" alt="enter image description here"></p>
+<p><em><a href="https://github.com/freebayes/freebayes/blob/master/paper/100samples10x_0_25_both.png">https://github.com/freebayes/freebayes/blob/master/paper/100samples10x_0_25_both.png</a></em></p>
+<hr>
+<h5 id="rekomendowany-workflow-freebayes">Rekomendowany workflow FreeBayes:</h5>
+<ol>
+<li>Mapowanie odczytów do odpowiedniego genomu referencyjnego (np. za pomocą <code>bwa</code> lub <code>MOSAIK</code>).</li>
+<li>Dodanie grup odczytów, aby móc zidentyfikować próbki. Można to zrobić podczas mapowania, a także po mapowaniu za pomocą narzędzi takich jak <code>bamaddrg</code>.</li>
+<li>Sortowanie odczytów (np. przy użyciu <code>sambamba sort</code>).</li>
+<li>Oznaczanie duplikatów (np. za pomocą <code>sambamba markdup</code>), jeśli zastosowano PCR w przygotowaniu próbki.</li>
+<li>Uruchomienie FreeBayes na wszystkich zmapowanych danych jednocześnie. Domyślne ustawienia będą odpowiednie dla większości przypadków, ale warto dostosować parametry takie jak <code>--ploidy</code> w przypadku organizmów o innych liczbach chromosomów (np. tetraploidalnych) oraz ustawić <code>--min-alternate-fraction</code> dla różnych wariantów alleli.</li>
+<li>Filtrowanie wyników, np. na podstawie jakości wariantu (QUAL), głębokości pokrycia (DP) lub liczby obserwacji (AO).</li>
+<li>Interpretacja wyników</li>
+<li>Ewentualna iteracja procesu identyfikacji wariantów na podstawie uzyskanych wyników i obserwacji.</li>
+</ol>
+<hr>
+<h5 id="podstawowa-identyfikacja-wariantów">Podstawowa identyfikacja wariantów</h5>
+<p>Aby przeprowadzić podstawową identyfikację wariantów za pomocą FreeBayes, uruchamiamy następującą komendę:</p>
+<pre><code>freebayes -f seq.fa illumina_markdup.bam
+</code></pre>
+<p><strong>Pytanie:</strong> Ile wariantów zostało zidentyfikowanych? Czy liczba wariantów uzyskana za pomocą <code>FreeBayes</code> jest taka sama jak w przypadku <code>bcftools</code>?</p>
+<hr>
+<h4 id="porównywanie-wariantów">Porównywanie wariantów</h4>
+<p>Porównanie plików VCF jest możliwe za pomocą pakietu <code>bcftools</code>, który oferuje wiele narzędzi do manipulacji plikami VCF. Przed rozpoczęciem pracy nad analizą warto sprawdzić, czy potrzebne funkcjonalności nie zostały już zaimplementowane w tym pakiecie. Jeśli piszesz swoje analizy w Pythonie, warto zapoznać się z biblioteką <a href="https://github.com/brentp/cyvcf2">cyvcf2</a>.</p>
+<ol>
+<li>Aby wygenerować pliki VCF, uruchom:</li>
+</ol>
+<pre><code>bcftools mpileup -f seq.fa illumina_markdup.bam \
+| bcftools call -mv &gt; snp_bcftools.vcf
+    
+freebayes -f seq.fa illumina_markdup.bam &gt; snp_freebayes.vcf
+</code></pre>
+<ol start="2">
+<li><code>bcftools</code> wymaga skompresowanych i zindeksowanych plików wejściowych. Aby przygotować pliki, wykonaj następujące kroki:</li>
+</ol>
+<pre><code>bgzip snp_bcftools.vcf
+bgzip snp_freebayes.vcf
+tabix snp_bcftools.vcf.gz
+tabix snp_freebayes.vcf.gz
+</code></pre>
+<ol start="3">
+<li>Porównanie plików przeprowadzimy za pomocą komendy <code>isec</code>:</li>
+</ol>
+<pre><code>bcftools isec snp_bcftools.vcf.gz snp_freebayes.vcf.gz -p isec
+</code></pre>
+<ol start="4">
+<li>Opis plików wynikowych można znaleźć w pliku <code>README.txt</code>:</li>
+</ol>
+<pre><code>cat isec/README.txt
+</code></pre>
+<hr>
+<p><strong>Pytania do analizy:</strong></p>
+<ul>
+<li>Czy znaleźliście jakieś różnice w wynikach?</li>
+<li>Czy różnice te utrzymują się po dodaniu do polecenia FreeBayes flagi <code>--haplotype-length 0</code>?</li>
+</ul>
+<hr>
+<h4 id="statystyki-vc">Statystyki VC</h4>
+<p>Podstawowe statystyki dotyczące naszego zbioru wariantów można uzyskać za pomocą <code>bcftools stats</code>. Oprócz technicznych informacji, takich jak jakość czy liczba wariantów, generowane są także pewne metryki mogące mieć znaczenie biologiczne, które mogą świadczyć o jakości danych, np. stosunek tranzycji do transwersji (Ti/Tv) lub zgodność z równowagą Hardy’ego-Weinberga.</p>
+<pre><code>bcftools stats -s - snp_freebayes.vcf.gz |
+bcftools stats -s - snp_freebayes.vcf.gz | grep ^\#
+bcftools stats -s - snp_freebayes.vcf.gz | grep QUAL
+</code></pre>
+<p><code>bcftools</code> oferuje również narzędzia do wizualizacji statystyk za pomocą skryptu <code>plot-vcfstats</code>:</p>
+<pre><code>bcftools stats -s - snp_freebayes.vcf.gz &gt; raw_stats
+plot-vcfstats -p plot_raw_stats raw_stats
+</code></pre>
+<hr>
+<h5 id="tstv-titv-—-stosunek-tranzycji-do-transwersji">TS/TV (Ti/Tv) — Stosunek Tranzycji do Transwersji</h5>
+<p><img src="https://rosalind.info/media/transitions-transversions.png" alt="enter image description here"></p>
+<p><em><a href="https://rosalind.info/media/transitions-transversions.png">https://rosalind.info/media/transitions-transversions.png</a></em></p>
+<p>Stosunek tranzycji do transwersji jest charakterystyczny dla danego genomu lub jego regionów i może służyć jako wskaźnik jakości variant callingu. Przy założeniu losowych mutacji oczekiwalibyśmy, że transwersje będą dwukrotnie częstsze niż tranzycje, co daje stosunek Ti/Tv równy 0.5. Jednak obserwowane wartości są zwykle wyższe, m. in. z powodu powszechnej deaminacji 5-metylocytozyny do tyminy. Dla całego genomu ludzkiego wartość Ti/Tv wynosi około 2:1, a dla eksomu około 2.8:1. Znaczące odchylenia od tych wartości w analizowanym zbiorze wariantów mogą sygnalizować obecność licznych fałszywie pozytywnych wyników.</p>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/ae/Deamination_5-Methylcytosine_to_Thymine.svg/2560px-Deamination_5-Methylcytosine_to_Thymine.svg.png" alt="enter image description here"></p>
+<p><em><a href="https://en.wikipedia.org/wiki/5-Methylcytosine#/media/File:Deamination_5-Methylcytosine_to_Thymine.svg">https://en.wikipedia.org/wiki/5-Methylcytosine#/media/File:Deamination_5-Methylcytosine_to_Thymine.svg</a></em></p>
+<hr>
+<h4 id="filtrowanie-wariantów">Filtrowanie wariantów</h4>
+<p>Po zidentyfikowaniu wariantów kolejnym krokiem w analizie jest ich filtrowanie, czyli wybór interesujących nas podzbiorów. W tym celu ponownie skorzystamy z <code>bcftools</code>.</p>
+<h5 id="filtrowanie-wariantów-według-typu">Filtrowanie wariantów według typu</h5>
+<p>Aby wybrać jedynie warianty typu SNP (ang. single nucleotide polymorphisms), możemy zastosować flagę <code>-i</code> (include), natomiast <code>-e</code> (exclude) pozwala wykluczyć wybrany typ wariantów:</p>
+<pre><code>bcftools view -i 'TYPE="SNP"' snp_freebayes.vcf.gz
+</code></pre>
+<p>Alternatywnie, można użyć flagi <code>-v</code> do określenia typu wariantu (lub <code>-V</code> do wykluczania):</p>
+<pre><code>bcftools view -v snps snp_freebayes.vcf.gz
+</code></pre>
+<p>Aby otrzymać skompresowany plik wyjściowy:</p>
+<pre><code>bcftools view -v snps -Oz snp_freebayes.vcf.gz
+</code></pre>
+<hr>
+<p><strong>Zadanie:</strong> Ile indeli znalazłeś w zestawie? Czy oprócz SNP i indeli znajdują się tam inne typy wariantów?</p>
+<hr>
+<h5 id="wybór-interesujących-kolumn-za-pomocą-bcftools-query">Wybór interesujących kolumn za pomocą <code>bcftools query</code></h5>
+<p>Narzędzie query umożliwia tworzenie podzbiorów danych z wybranych kolumn, a także pól zdefiniowanych w <code>INFO</code> i <code>FORMAT</code>. Na przykład, aby wyciągnąć jedynie wartości jakości dla SNP:</p>
+<pre><code>bcftools query -i 'TYPE="SNP"' -f '%QUAL\n' snp_freebayes.vcf.gz
+</code></pre>
+<hr>
+<p><strong>Zadanie:</strong> Stwórz tabelę zliczeń dla pola <code>AC</code> (zliczenia alleli), korzystając z narzędzi takich jak <em>sort</em> i <em>uniq -c</em>.</p>
+<hr>
+<h5 id="filtrowanie-według-jakości-qual-i-głębokości-pokrycia-dp">Filtrowanie według jakości (QUAL) i głębokości pokrycia (DP)</h5>
+<p>Zazwyczaj głównym celem filtrowania jest zachowanie jak największej liczby prawdziwych wariantów przy jednoczesnym eliminowaniu wyników fałszywie pozytywnych. Część narzędzi variant callingu automatycznie nakłada pewne filtry, jednak w przypadku FreeBayes filtrowanie wyników pozostaje w gestii użytkownika:</p>
+<pre><code>zcat snp_freebayes.vcf.gz|grep -v \#|cut -f 7|sort|uniq -c
+</code></pre>
+<p>Niestety nie istnieje “przepis” na optymalne filtrowanie wariantów. Są natomiast pewne czynniki, na które warto zwrócić uwagę, aby zwiększyć jakość naszego zbioru wariantów. Dwa najważniejsze to jakość (<code>QUAL</code>) i głębokość pokrycia (<code>DP</code>). QUAL określa prawdopodobieństwo, że dane locus jest polimorficzne, wyrażone w skali PHRED.</p>
+<p>Aby odfiltrować warianty o jakości &lt;= 20 (prawdopodobieństwo błędu na poziomie 0.01):</p>
+<pre><code>bcftools view  -i 'TYPE="SNP" &amp;&amp; QUAL&gt;20' snp_freebayes.vcf.gz
+</code></pre>
+<p>Opcjonalnie, zamiast <code>bcftools view</code> możemy wykorzystać <code>filter</code>. W wyniku tej operacji w polu <code>FILTER</code> pojawia się informacja, że warianty zostały poddane filtrowaniu:</p>
+<pre><code>bcftools filter  -i 'TYPE="SNP" &amp;&amp; QUAL&gt;20' snp_freebayes.vcf.gz
+zcat snp_freebayes.vcf.gz|grep -v \#|cut -f 7|sort|uniq -c
+</code></pre>
+<p><code>bcftools filter</code> umożliwia także softfiltering, czyli oznaczanie wariantów spełniających kryteria bez ich usuwania</p>
+<pre><code>bcftools filter -s SNP_QUALFILTER -i 'TYPE="SNP" &amp;&amp; QUAL&gt;20' snp_freebayes.vcf.gz|grep QUALFILTER
+zcat snp_freebayes.vcf.gz|grep -v \#|cut -f 7|sort|uniq -c
+bcftools filter -s SNP_QUALFILTER -i 'TYPE="SNP" &amp;&amp; QUAL&gt;20' snp_freebayes.vcf.gz|grep -v \#|cut -f 7|sort|uniq -c
+</code></pre>
+<hr>
+<p><strong>Zadanie:</strong> stosując softfiltering odfiltruj warianty o jakości &lt; 20 i głębokości pokrycia &lt; 10.</p>
+<hr>
+<p>Doskonała ściąga dotycząca filtrowania VCF dostępna jest pod adresem:<br>
+<a href="https://gist.github.com/elowy01/93922762e131d7abd3c7e8e166a74a0b">https://gist.github.com/elowy01/93922762e131d7abd3c7e8e166a74a0b</a></p>
+<hr>
+<h4 id="definiowanie-regionów-do-variant-callingu">Definiowanie regionów do variant callingu</h4>
+<p>O jakość naszych wyników możemy zadbać już na etapie wywoływania wariantów. Przykładowo analizę możemy ograniczyć do specyficznych regionów genomu lub określić progi pokrycia. Wprowadzenie tych ograniczeń może poprawić jakość wyników a także znacząco zredukować koszt obliczeniowy (a zatem także czas).</p>
+<hr>
+<h5 id="pomijanie-fragmentów-o-zbyt-małym-i-zbyt-dużym-pokryciu">Pomijanie fragmentów o zbyt małym i zbyt dużym pokryciu:</h5>
+<p>Przed wywoływaniem wariantów ustalmy odpowiednie zakresy głębokości:</p>
+<pre><code>samtools depth illumina_markdup.bam| awk '$3&lt;=1000' | \
+gnuplot -p -e "set terminal pngcairo size 800,600;\
+set output 'coverage_histogram.png'; \
+set title 'Sequencing Coverage Histogram'; \
+set xlabel 'Coverage Depth'; \
+set ylabel 'Frequency';\
+binwidth=1; bin(x,width)=width*floor(x/width); \
+plot '-' using (bin(\$3,binwidth)):(1.0) smooth freq with boxes notitle"
+</code></pre>
+<p>Następnie ustawiamy minimalne pokrycie (<code>--min-coverage 5</code>) i maksymalne pokrycie (<code>-g 80</code>) podczas uruchamiania FreeBayes:</p>
+<pre><code>freebayes -f seq.fa illumina_markdup.bam --min-coverage 5 -g 80 |wc -l
+</code></pre>
+<hr>
+<h5 id="wywoływanie-wariantów-w-wybranych-regionach">Wywoływanie wariantów w wybranych regionach</h5>
+<p>Aby przeprowadzić variant calling tylko w określonym regionie:</p>
+<pre><code>freebayes -f seq.fa illumina_markdup.bam -r 0:1000-2000
+</code></pre>
+<p>Na podstawie zakresów zdefiniowanych w pliku bam:</p>
+<pre><code>freebayes -f seq.fa illumina_markdup.bam -t &lt;(echo -e "0\t1000\t2000")
+</code></pre>
+<hr>
+<h3 id="łączona-identyfikacja-wariantów">Łączona identyfikacja wariantów</h3>
+<p>W wielu badaniach biologicznych chcielibyśmy poznać genotypy pochodzące z wielu próbek, np. różnych osobników z populacji.  W takich przypadkach, zamiast przeprowadzać osobny proces identyfikacji wariantów dla każdej próbki i następnie łączyć pliki VCF, powinniśmy przeprowadzać identyfikację wariantów w sposób łączony, wykorzystując dane z wszystkich próbek jednocześnie. Taki sposób analizy zwiększa czułość i precyzję, umożliwiając dokładniejszą identyfikację wariantów w każdej próbce, bazując na danych z pozostałych próbek.</p>
+<p>Aby przeprowadzić wspólną identyfikację wariantów, zaczniemy od wygenerowania odczytów dla wyjściowych genomów, które wcześniej złożyliśmy w genom diploidalny:</p>
+<pre><code>art_illumina -ss HSXt -sam -i seq_s1.fa -p -l 150 -f 30 -m 350 -s 10 -o illumina_s1
+art_illumina -ss HSXt -sam -i seq_s2.fa -p -l 150 -f 30 -m 350 -s 10 -o illumina_s2
+</code></pre>
+<p>Zmapujmy odczyty do genomu:</p>
+<pre><code>bwa mem -R '@RG\tID:2\tSM:2' -t 10 seq.fa illumina_s11.fq illumina_s12.fq|samtools sort &gt; illumina_s1_bwa.bam &amp;&amp; samtools index illumina_s1_bwa.bam
+bwa mem -R '@RG\tID:3\tSM:3' -t 10 seq.fa illumina_s21.fq illumina_s22.fq|samtools sort &gt; illumina_s2_bwa.bam &amp;&amp; samtools index illumina_s2_bwa.bam
+</code></pre>
+<p>Przeprowadźmy łączoną identyfikację wariantów:</p>
+<pre><code>freebayes -f seq.fa illumina_s1_bwa.bam illumina_s2_bwa.bam -p 1 &gt; snp_both_freebayes.vcf
+</code></pre>
+<p>W sytuacji, gdy nie mamy wszystkich danych od razu lub dane spływają sekwencyjnie, możemy skorzystać z formatu GVCF (Genomic Variant Call Format), który jest rozszerzeniem formatu VCF. Format GVCF umożliwia wygodne przechowywanie zarówno informacji o wariantach, jak i o regionach genomu, w których nie wykryto wariantów. Dzięki temu, w przypadku dodania nowej próbki, możemy uniknąć ponownego, zasobochłonnego wywoływania wariantów dla wcześniej analizowanych próbek, a zamiast tego wykorzystać już istniejące pliki GVCF do łączonego genotypowania.</p>
+<p>Aby otrzymać plik w formacie GVCF z FreeBayes, należy dodać flagę <code>--gvcf</code>:</p>
+<pre><code>freebayes -f seq.fa illumina_markdup.bam --gvcf &gt; snp_freebayes.gvcf 
+</code></pre>
+<hr>
+<p><img src="https://drive.google.com/uc?id=15SEjjzXHpnjXJ2VPri7Q9NVKBn0-TEP0" alt="enter image description here"></p>
+<p><em><a href="https://gatk.broadinstitute.org/hc/en-us/articles/360035531812-GVCF-Genomic-Variant-Call-Format">https://gatk.broadinstitute.org/hc/en-us/articles/360035531812-GVCF-Genomic-Variant-Call-Format</a></em></p>
+<hr>
+<h4 id="phasing">Phasing</h4>
+<p>Phasing, czyli określanie haplotypów, jest istotnym etapem analizy wariantów w genomach niehaploidalnych. Proces ten polega na przyporządkowaniu alleli do odpowiednich kopii chromosomów homologicznych (odziedziczonych po każdym z rodziców) poprzez łączenie współwystępujących alleli w dłuższe segmenty na podstawie ciągłości wspierających je odczytów.</p>
+<p>Narzędzie FreeBayes wykonuje phasing, choć ogranicza się do stosunkowo krótkich odcinków, a wiele narzędzi do identyfikacji wariantów w ogóle tej operacji nie przeprowadza. Jednak po zakończeniu identyfikacji wariantów pełne haplotypowanie można przeprowadzić za pomocą dedykowanych narzędzi, takich jak <a href="https://whatshap.readthedocs.io/en/latest/">WhatsHap</a>:</p>
+<p>Aby przeprowadzić domyślne haplotypowanie za pomocą <code>WhatsHap</code>:</p>
+<pre><code># mamba create -n whatshap -c bioconda -c conda-forge whatshap
+
+conda activate whatshap
+whatshap phase --reference=seq.fa snp_freebayes.vcf.gz illumina_markdup.bam -o snp_freebayes_phased.vcf
+</code></pre>
+<p>Następnie możemy porównać statystyki dla plików VCF przed i po haplotypowaniu:</p>
+<pre><code>whatshap stats snp_freebayes.vcf.gz
+whatshap stats snp_freebayes_phased.vcf
+</code></pre>
+<p>Po zakończeniu procesu plik VCF zostanie uzupełniony o tag PS (Phase Set), który przypisuje warianty do ciągłych segmentów genomu, w których udało się odtworzyć haplotypy. Warto pamiętać, że bez dodatkowych danych nie można przypisać tych segmentów do konkretnego rodzica, ale każdy segment możemy traktować jako odwzorowanie jednej z dwóch homologicznych kopii chromosomu.</p>
+<hr>
+<p><strong>Przykład:</strong> Ile wariantów zawiera najliczniejszy Phase Set? Wyświetl te warianty w IGV.</p>
+<pre><code>max_phaseset=$(bcftools view -p snp_freebayes_phased.vcf | bcftools query -f '[%PS\n]' | sort | uniq -c | sort -nr | head -1 | awk '{print $2}')
+bcftools view -p -i "PS=$max_phaseset" snp_freebayes_phased.vcf &gt; snp_freebayes_phased_only.vcf
+</code></pre>
+<blockquote>
+<p><code>-p</code>: wyświetla jedynie warianty, które zostały zhaplotypowane. Warianty nieprzypisane do żadnego haplotypu można wyświetlić, stosując flagę <code>-P</code>.</p>
+</blockquote>
+<hr>
+<h5 id="haplotagowanie">Haplotagowanie</h5>
+<p>Po przyporządkowaniu wariantów do konkretnych haplotypów możemy również przypisać poszczególne odczyty do haplotypów na podstawie ich zgodności z konkretnymi allelami. Operację taką nazywamy haplotagowaniem i możemy ją wykonać za pomocą <code>WhatsHap</code>:</p>
+<pre><code>whatshap haplotag --reference=seq.fa snp_freebayes_phased.vcf illumina_markdup.bam -o illumina_haplotagged.bam
+</code></pre>
+<p>W efekcie odczyty w pliku illumina_haplotagged.bam zostaną oznaczone tagami HP (Haplotype) oraz PS (Phase Set), co umożliwia identyfikację ich przynależności do odpowiednich haplotypów i segmentów:</p>
+<pre><code>samtools view illumina_haplotagged.bam | grep -E "PS|HP"
+</code></pre>
+<hr>
+<h6 id="wizualizacja-w-igv">Wizualizacja w IGV</h6>
+<p>Obejrzyj zhaplotagowane odczyty w programie <code>IGV</code>, kolorując odczyty według tagów HP i PS.</p>
+<hr>
+<h4 id="ponowne-przyrównanie-odczytów-wokół-indeli">Ponowne przyrównanie odczytów wokół indeli</h4>
+<p>W niektórych workflowach, takich jak starsze wersje GATK Best Practices, uwzględniono etap “Indel realignment”. Jego celem jest poprawa jakości oraz precyzji analizy wariantów przez lokalne dopasowanie sekwencji wokół indeli.</p>
+<hr>
+<p><img src="https://us.v-cdn.net/5019796/uploads/FileUpload/eb/44f317f8850ba74b64ba47b02d1bae.png" alt="enter image description here"></p>
+<p><em><a href="https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/methods-and-algorithms/3238-Best-Practices-for-Variant-Discovery-in-DNAseq">https://sites.google.com/a/broadinstitute.org/legacy-gatk-forum-discussions/methods-and-algorithms/3238-Best-Practices-for-Variant-Discovery-in-DNAseq</a></em></p>
+<p><img src="https://raw.githubusercontent.com/dpryan79/MethIndelRealigner/master/images/InDelExample.annotated.png" alt="enter image description here"><br>
+<img src="https://raw.githubusercontent.com/dpryan79/MethIndelRealigner/master/images/RealignedExample.png" alt="enter image description here"></p>
+<p><em><a href="https://bioinformatics.stackexchange.com/questions/2820/what-is-local-realignment-and-what-is-the-problem-it-solves/2821#2821">https://bioinformatics.stackexchange.com/questions/2820/what-is-local-realignment-and-what-is-the-problem-it-solves/2821#2821</a></em></p>
+<hr>
+<p>Ponieważ w nowszych wersjach GATK oraz w narzędziu freebayes stosuje się rekonstruowanie haplotypów, problem związany z niedokładnym przyrównaniem wokół indeli został częściowo rozwiązany. Jednak w niektórych przypadkach realignment może nadal poprawić precyzję analizy.</p>
+<hr>
+<p><strong>Zadanie:</strong>  Przeprowadź lokalne dopasowanie wokół indeli za pomocą narzędzia <a href="https://github.com/mozack/abra2">Abra2</a>. Zidentyfikuj potencjalnie problematyczne regiony, gdzie pierwotne dopasowanie może mieć wpływ na dokładność wywoływania wariantów.</p>
+<p>Aby wykonać zadanie, pobierz wersję Abra2 2.23 (wersja 2.24 może nie działać poprawnie):</p>
+<pre><code>mkdir abra2 &amp;&amp; cd abra2
+wget https://github.com/mozack/abra2/releases/download/v2.23/abra2-2.23.jar
+pwd
+# export abra2="java -Xmx16G -jar $(pwd)/abra2-2.23.jar"
+</code></pre>
+<p>Przeprowadzenie ponownego przyrównania:</p>
+<pre><code>$abra2 --in ../illumina_markdup.bam --out ../illumina_markdup_abra.bam --ref ../seq.fa --threads 10 --tmpdir tmp &gt; abra_normal.log
+</code></pre>
+<blockquote>
+<p>W razie wystąpienia błędu, użyj komendy <code>export LC_ALL=en_US.UTF-8</code></p>
+</blockquote>
+<p>Wywołanie wariantów na poprawionym dopasowaniu odczytów:</p>
+<pre><code>freebayes -f seq.fa illumina_markdup_abra.bam &gt; snp_freebayes_abra.vcf
+bgzip snp_freebayes_abra.vcf
+tabix snp_freebayes_abra.vcf.gz
+</code></pre>
+<p>Porównanie wyników wywoływania wariantów z i bez ponownego przyrównania:</p>
+<pre><code>bcftools isec snp_freebayes.vcf.gz snp_freebayes_abra.vcf.gz -p isec_abra
+</code></pre>
+<p><strong>Wizualizacja różnicujących wariantów:</strong> Obejrzyj różnicujące w programie IGV, aby ocenić, czy realignment poprawił jakość dopasowania i identyfikację wariantów.</p>
+<hr>
+<h3 id="normalizacja-wariantów">Normalizacja wariantów</h3>
+<p>Jednolitość reprezentacji wariantów jest kluczowa dla spójności analizy. W przypadku indeli każdy wariant może być opisany na wiele sposobów, jednak dowiedziono, że dwa warianty są identyczne, jeżeli ich znormalizowane, czyli najbardziej parsymoniczne, wyrównane do lewej reprezentacje są takie same. Wiele narzędzi do identyfikacji wariantów domyślnie zwraca już znormalizowane wyniki. Jeśli jednak tak nie jest (lub nie jesteśmy pewni), warto zastosować bcftools norm lub narzędzie <a href="http://github.com/atks/vt">vt</a> do przeprowadzenia normalizacji.</p>
+<hr>
+<p><img src="https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/bioinformatics/31/13/10.1093_bioinformatics_btv112/4/m_bioinformatics_31_13_2202_f2.gif?Expires=1765187104&amp;Signature=ItQVIsgLoRY3RLowBaav-VU7MnI2XMhm~KcKrqC9SZAfUP8UwIxQrTpyUqLHUu6VAQ8QlW8CZUhA4aX8druHH5u3JyokS4EAs01k0ODQiWP9pa0HkEZETKLY8sk6LCZfBZteVHQImYXXamLiBmzI1ojRH3kHp9AokvAjYmKm0Movu0EJV0XBrymCFDdlH1AqGMPLFocOmiz7yckeMwMvTZ~Us-rQgiZIfss1fqRNeRTMKQfLvocCy5Qa33r0SzCiYwRVsOEFIDYWGHAJixE~28AZdDu0YIyoBK~5TlQl8Ts49M36dz-IsW7MN9mH3kM21B0IrjCXjri7qlMi3sbkWA__&amp;Key-Pair-Id=APKAIE5G5CRDK6RD3PGA" alt="enter image description here"></p>
+<p><em>Przykłady reprezentacji tego samego wariantu w formacie VCF. Panel lewy wyrównuje allele do genomu referencyjnego, panel prawy reprezentuje warianty w VCF. (A) nie jest wyrównany do lewej, (B) nie jest wyrównany ani parsymoniczny, © jest nieparsymoniczny, (D) jest znormalizowany.</em></p>
+<p><em><a href="https://academic.oup.com/bioinformatics/article/31/13/2202/196142">https://academic.oup.com/bioinformatics/article/31/13/2202/196142</a></em></p>
+<hr>
+<p>Aby przeprowadzić normalizację wariantów dla danych uzyskanych z FreeBayes:</p>
+<pre><code>bcftools norm -O z -f seq.fa snp_freebayes.vcf.gz &gt; snp_freebayes_norm.vcf.gz
+bcftools norm -O z -f seq.fa snp_freebayes_abra.vcf.gz &gt; snp_freebayes_abra_norm.vcf.gz
+tabix snp_freebayes_norm.vcf.gz
+tabix snp_freebayes_abra_norm.vcf.gz
+</code></pre>
+<p>Porównanie wyników po normalizacji:</p>
+<pre><code>bcftools isec snp_freebayes_norm.vcf.gz snp_freebayes_abra_norm.vcf.gz -p isec_abra_norm
+</code></pre>
+<p>Czy normalizacja pozwoliła na zniwelowanie części różnic pomiędzy zbiorem wariantów? Porównaj wyniki (również w IGV) i sprawdź, czy uproszczenie reprezentacji wariantów wpłynęło na ich zgodność.</p>
+<hr>
+<h4 id="małe-warianty-na-podstawie-sekwencjonowania-długich-odczytów">Małe warianty na podstawie sekwencjonowania długich odczytów</h4>
+<p>Istnieje kilka narzędzi przeznaczonych do identyfikacji krótkich wariantów na podstawie danych z sekwencjonowania trzeciej generacji. Dla danych z platformy Nanopore najczęściej wykorzystywane są <a href="https://github.com/HKU-BAL/Clair">Clair</a>,  <a href="https://github.com/nanoporetech/medaka">Medaka</a>, czy DeepVariant. Dobrym programem jest również <a href="https://github.com/pjedge/longshot">longshot</a>, jednak to narzędzie identyfikuje wyłącznie SNP.</p>
+<hr>
+<p><strong>Zadanie:</strong> Dokonaj symulacji odczytów Nanopore 20x dla diploidalnego genomu referencyjnego. Zmapuj odczyty, przefiltruj wyniki i porównaj je z wynikami uzyskanymi z FreeBayes. Obejrzyj dane w IGV.</p>
+<p>Symulacja odczytów Nanopore:</p>
+<pre><code>badread simulate --reference seq_s.fa --quantity 20x &gt; nanopore_s.fq
+</code></pre>
+<p>Mapowanie:</p>
+<pre><code>minimap2 seq.fa nanopore_s.fq -t20 -ax map-ont|samtools sort &gt; nanopore_s.bam &amp;&amp; samtools index nanopore_s.bam
+</code></pre>
+<p>Identyfikacja wariantów:</p>
+<pre><code>#mamba install longshot -c bioconda
+longshot --bam nanopore_s.bam --ref seq.fa --out nanopore_s.vcf
+</code></pre>
+<hr>
+<h3 id="inne-technologie-do-identyfikacji-małych-wariantów">Inne technologie do identyfikacji małych wariantów</h3>
+<p>Jedną z powszechnie stosowanych technologii do identyfikacji małych wariantów, niezwiązanych z sekwencjonowaniem, są mikromacierze, takie jak <a href="https://www.youtube.com/watch?v=lVG04dAAyvY&amp;">Illumina Infinium</a>. Mikromacierze umożliwiają analizę setek tysięcy do milionów wariantów w genomie, korzystając z specyficznych sond przeznaczonych do wykrywania określonych polimorfizmów.</p>
+<hr>
+<p><img src="https://www.illumina.com/content/dam/illumina-marketing/images/technology/microarray/how-microarrays-work-web-graphic.jpg" alt="enter image description here"></p>
+<p><em><a href="https://www.illumina.com/science/technology/microarray.html">https://www.illumina.com/science/technology/microarray.html</a></em></p>
+<hr>
+<p><strong>Pytanie:</strong> Jakie widzisz zalety i wady mikromacierzy w porównaniu do technologii NGS w kontekście identyfikacji zmienności?</p>
+<hr>
+<h3 id="zadanie-domowe---somatyczny-vc">Zadanie domowe - somatyczny VC</h3>
+<p>Na serwerze w folderze ~/dane_vc/seq_raw znajdują się sparowane odczyty WES (Whole-Exome-Sequencing) ze zdrowej tkanki oraz tkanki nowotworowej pacjenta (człowieka). W zestawie są jedynie odczyty mapujące do chromosomów 5, 12 i 17. Dokonaj identyfikacji małych wariantów somatycznych (różnicujących tkankę zdrową i nowotworową) dwoma narzędziami: poznanym wcześniej FreeBayes oraz dedykowanym narzędziem, Strelka2. Pracując z FreeBayes, weź pod uwagę, że guz nie ma zdefiniowanej ploidalności. Przed porównaniem znormalizuj VCF-y (rozbicie wariantów wieloallelicznych, wyrównanie do lewej) i odfiltruj warianty o częstości allelu &lt; 0.2 (Strelka domyślnie nie zwraca AF, rekomendowany sposób obliczenia tej wartości znajdziecie w <a href="https://github.com/Illumina/strelka/blob/v2.9.x/docs/userGuide/README.md">dokumentacji</a>).</p>
+<p>Wynikiem powinny być dwa pliki VCF po filtrach (FreeBayes i Strelka2) oraz krótki opis kroków (krok po kroku) wraz z krótkim porównaniem otrzymanych zbiorów (liczba wariantów, SNP/INDEL, część wspólna/unikalna).</p>
+<hr>
+<h2 id="adnotacja-wariantów">Adnotacja wariantów</h2>
+<p>Adnotacja wariantów pozwala na określenie ich potencjalnego biologicznego znaczenia oraz konsekwencji wykrytych zmian w sekwencji DNA. Dzięki precyzyjnemu określeniu pozycji wariantu względem genów i ich podstruktur (np. eksonów, intronów) oraz charakteru mutacji w obrębie CDS (np. mutacje synonimiczne, zmiany ramki odczytu), możliwe jest przewidywanie ich wpływu na funkcje genów. Porównując warianty z danymi z baz, takich jak dbSNP czy ClinVar, można dodatkowo sprawdzić, czy są one powiązane z wcześniej opisaną zmiennością. Do przeprowadzania adnotacji służą narzędzia takie jak <a href="https://www.tandfonline.com/doi/full/10.4161/fly.19695">snpEff</a>, <a href="https://academic.oup.com/nar/article/38/16/e164/1749458?login=true">ANNOVAR</a> czy <a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-016-0974-4">VEP</a>.</p>
+<hr>
+<h3 id="adnotacja-wariantów-z-użyciem-snpeff">Adnotacja wariantów z użyciem snpEff</h3>
+<p>W tej części dokonamy adnotacji wariantów somatycznych zidentyfikowanych w zadaniu domowym, aby określić ich potencjalne znaczenie funkcjonalne.</p>
+<hr>
+<p><strong>1. Pobranie i przygotowanie narzędzia snpEff</strong></p>
+<p>Pobierz i skonfiguruj narzędzie snpEff:</p>
+<pre><code>wget https://snpeff.blob.core.windows.net/versions/snpEff_latest_core.zip
+unzip snpEff_latest_core.zip
+rm snpEff*zip
+cd snpEff
+export snpeff="java -jar $(pwd)/snpEff.jar"
+export snpsift="java -jar $(pwd)/snpSift.jar"
+</code></pre>
+<hr>
+<p><strong>2. Sprawdzenie dostępnych baz danych</strong></p>
+<p>Sprawdź listę dostępnych baz danych, zwracając szczególną uwagę na te związane z genomem ludzkim:</p>
+<pre><code>$snpeff databases|grep sapiens
+</code></pre>
+<hr>
+<p><strong>3. Adnotacja wariantów</strong></p>
+<p>Wybierz odpowiednią bazę danych (np. GRCh38.105), zgodną z wersją genomu, do którego mapowane były odczyty, i wykonaj adnotację:</p>
+<pre><code>$snpeff GRCh38.105 somatic_short_pass.vcf &gt; somatic_short_pass_snpeff.vcf
+</code></pre>
+<hr>
+<p><strong>4. Analiza raportu HTML</strong></p>
+<p>Po wykonaniu adnotacji zapoznaj się z wygenerowanym raportem HTML. Raport zawiera szczegółowe statystyki dotyczące rozkładu wariantów w genomie oraz ich potencjalnego wpływu na funkcję genów.</p>
+<hr>
+<h4 id="zadanie-domowe">Zadanie domowe</h4>
+<p>W raporcie HTML znajduje się wykres przedstawiający liczbę wariantów w różnych częściach genomu (np. intergenic, exon, downstream, 5’UTR). Twoim zadaniem jest wykonanie podobnego wykresu, korzystając wyłącznie z własnego pliku VCF oraz adnotacji w formacie GTF/GFF3. Przyjmij następujące założenia:</p>
+<ul>
+<li>Upstream i downstream – granica 5 kb od regionu genowego.</li>
+<li>Jeśli okaże się to zbyt trudne, możesz pominąć określanie miejsc splicingowych.</li>
+</ul>
+<p>Do ekstrakcji danych możesz wykorzystać narzędzia takie jak <code>bedtools</code>.</p>
+<p>Oczekiwane wyniki:</p>
+<ul>
+<li>Wykres ilustrujący liczbę wariantów w poszczególnych kategoriach (np. intergenic, exon, UTR).</li>
+<li>Workflow – opis kroków i narzędzi użytych do uzyskania danych niezbędnych do stworzenia wykresu.</li>
+</ul>
+<hr>
+<h3 id="adnotacja-wariantów-z-użyciem-znanych-baz-danych---snpsift">Adnotacja wariantów z użyciem znanych baz danych - snpSift</h3>
+<p>W tej części przeprowadzimy adnotację wariantów somatycznych, wykorzystując bazę danych <a href="https://www.ncbi.nlm.nih.gov/clinvar/">ClinVar</a>.  Dzięki temu sprawdzimy, czy zidentyfikowane warianty są powiązane z wcześniej opisanymi mutacjami, które mogą mieć znaczenie kliniczne.</p>
+<hr>
+<p><strong>1. Pobranie i przygotowanie bazy ClinVar</strong></p>
+<p>Pobierz bazę danych ClinVar w formacie VCF i przygotuj ją do pracy, indeksując plik:</p>
+<pre><code>wget https://ftp.ncbi.nlm.nih.gov/pub/clinvar/vcf_GRCh38/clinvar.vcf.gz
+tabix -p vcf clinvar.vcf.gz
+</code></pre>
+<hr>
+<p><strong>2. Adnotacja wariantów</strong></p>
+<p>Wykorzystaj narzędzie snpSift, aby adnotować warianty w pliku VCF (z wynikami snpEff) za pomocą danych z ClinVar:</p>
+<pre><code>$snpsift annotate clinvar.vcf.gz somatic_short_pass_snpeff.vcf
+</code></pre>
+<hr>
+<p><strong>3. Filtrowanie zadnotowanych wariantów</strong></p>
+<p>Możesz przeszukać plik wynikowy, aby wyodrębnić warianty o szczególnym znaczeniu klinicznym:</p>
+<p>Warianty z adnotacją CLN (informacje kliniczne z ClinVar):</p>
+<pre><code>$snpsift annotate clinvar.vcf.gz somatic_short_pass_snpeff.vcf | grep CLN
+</code></pre>
+<p>Warianty sklasyfikowane jako HIGH pod względem potencjalnego wpływu na funkcję genów:</p>
+<pre><code>$snpsift annotate clinvar.vcf.gz somatic_short_pass_snpeff.vcf |grep CLN|grep HIGH
+</code></pre>
+<hr>
+<p><strong>4. Analiza wyników</strong></p>
+<ul>
+<li>Zapoznaj się z przykładowymi wariantami o wysokim potencjalnym wpływie (HIGH).</li>
+<li>Sprawdź ich szczegółowe rekordy w bazie ClinVar i dbSNP, zwracając uwagę na ich lokalizację w genach i potencjalne powiązanie z chorobami.</li>
+<li>Obejrzyj wybrane warianty i wspierające je odczyty w IGV.</li>
+</ul>
+<hr>
+<h2 id="warianty-strukturalne">Warianty strukturalne</h2>
+<p>W badaniach genomicznych coraz więcej uwagi poświęca się zmienności strukturalnej (SV), która obejmuje szeroki zakres większych wariantów, takich jak insercje i delecje (umownie powyżej 50 bp), inwersje, duplikacje (tandemowe i rozproszone) oraz translokacje (intra- i interchromosomalne). Powstawanie tych wariantów wiąże się z różnymi mechanizmami, głównie rekombinacją i replikacją DNA (dla zainteresowanych - <a href="https://doi.org/10.1038/nrg.2015.25">przeglądówka</a>), a ich biologiczne konsekwencje są kluczowe w kontekście zmienności fenotypowej a także rozwoju chorób genetycznych i nowotworów.</p>
+<p><strong>Pytanie:</strong> Jakie mogą być biologiczne konsekwencje poszczególnych wariantów strukturalnych?</p>
+<hr>
+<h3 id="identyfikacja-wariantów-strukturalnych-z-wykorzystaniem-krótkich-odczytów">Identyfikacja wariantów strukturalnych z wykorzystaniem krótkich odczytów</h3>
+<p>Identyfikacja wariantów strukturalnych na podstawie krótkich odczytów (np. Illumina) jest zdecydowanie trudniejsza niż identyfikacja małych wariantów, ale możliwa dzięki zastosowaniu kilku technik. W przypadku krótkich odczytów najczęściej stosuje się trzy główne informacje do wykrywania SV:</p>
+<ol>
+<li>Niezgodność pary, na którą składają się <a href="https://software.broadinstitute.org/software/igv/interpreting_insert_size">długość insertu</a> i <a href="https://software.broadinstitute.org/software/igv/interpreting_pair_orientations">wzajemna orientacja odczytów</a></li>
+<li>Podzielone odczyty (<em>split reads</em>) – identyfikowanie odczytów, które mapują do dwóch różnych miejsc w genomie.</li>
+<li>Głębokość pokrycia.</li>
+</ol>
+<p>Do narzędzi, które wykorzystują wszystkie trzy typy informacji należą <a href="https://github.com/arq5x/lumpy-sv">LUMPY</a> oraz <a href="https://github.com/Illumina/manta">Manta</a>. Innymi często stosowanymi narzędziami są <a href="https://github.com/dellytools/delly">DELLY</a>, <a href="https://www.sanger.ac.uk/tool/pindel/">Pindel</a> czy <a href="https://github.com/genome/breakdancer">Breakdancer</a>.</p>
+<hr>
+<h5 id="przykład-identyfikacji-sv-za-pomocą-lumpy">Przykład identyfikacji SV za pomocą LUMPY</h5>
+<p>W pierwszym kroku generujemy zmutowaną wersję naszego genomu, dodając różne warianty strukturalne, takie jak insercje, duplikacje i inwersje:</p>
+<pre><code>python variantize.py seq.fa lsivsitdsi &gt; seq_l.fa
+</code></pre>
+<p>Następnie porównajmy te dwie wersje genomu za pomocą narzędzia <code>nucmer</code> i wizualizujemy różnice za pomocą <code>mummerplot</code>:</p>
+<pre><code>nucmer --maxmatch seq.fa seq_l.fa -p nucmer_out
+mummerplot nucmer_out.delta
+</code></pre>
+<p>Zasymulujmy odczyty i zmapujmy je do oryginalnego genomu:</p>
+<pre><code>art_illumina -ss HSXt -sam -i seq_l.fa -p -l 150 -f 30 -m 350 -s 10 -o illumina_l
+bwa mem -t 10 -R '@RG\tID:1\tSM:1' seq.fa illumina_l1.fq illumina_l2.fq|samtools sort &gt; illumina_l_bwa.bam &amp;&amp; samtools index illumina_l_bwa.bam
+</code></pre>
+<p>Aktywujmy środowisko z narzędziem <code>LUMPY</code>:</p>
+<pre><code>#mamba create -n lumpy -c conda-forge -c bioconda lumpy
+conda activate lumpy
+</code></pre>
+<p>Ekstrakcja niezgodnie sparowanych odczytów:</p>
+<pre><code>samtools view -bh -F 1294 illumina_l_bwa.bam|samtools sort &gt; illumina_discord.bam
+</code></pre>
+<p>Ekstrakcja podzielonych odczytów:</p>
+<pre><code>samtools index illumina_discord.bam
+samtools view -h illumina_l_bwa.bam |extractSplitReads_BwaMem -i stdin| samtools view -bh - | samtools sort &gt; illumina_splitters.bam
+samtools index illumina_splitters.bam
+</code></pre>
+<p>Identyfikacja wariantów:</p>
+<pre><code>lumpyexpress -B illumina_l_bwa.bam -S illumina_splitters.bam -D illumina_discord.bam -o lumpy_sv.vcf
+</code></pre>
+<p>Jeśli wystąpią problemy, można wypróbować alternatywne podejście:</p>
+<pre><code>samtools view -r 1 illumina_l_bwa.bam|tail -n+10000 | pairend_distro.py -r 150 -X 4 -N 10000 -o illumina.lib1.histo
+    
+lumpy -mw 4 -tt 0 -pe id:illumina,bam_file:illumina_discord.bam,histo_file:illumina.lib1.histo,mean:348,stdev:10.5,read_length:150,min_non_overlap:150,discordant_z:5,back_distance:10,weight:1,min_mapping_threshold:20 -sr id:illumina,bam_file:illumina_splitters.bam,back_distance:10,weight:1,min_mapping_threshold:20 &gt; lumpy_sv.vcf
+</code></pre>
+<p>Obejrzyj niezgodnie sparowane i podzielone odczyty oraz zidentyfikowane warianty w IGV.</p>
+<hr>
+<h3 id="identyfikacja-wariantów-strukturalnych-na-podstawie-długich-odczytów">Identyfikacja wariantów strukturalnych na podstawie długich odczytów</h3>
+<p>Długie odczyty (PacBio i Oxford Nanopore) stanowią doskonałe narzędzie do identyfikacji wariantów strukturalnych, ponieważ umożliwiają bezpośrednie przyrównanie długich fragmentów DNA, co pozwala na dokładniejsze uchwycenie zmian w strukturze genomu. Do najczęściej stosowanych narzędzi do identyfikacji SV na podstawie odczytów z sekwencjonowania trzeciej generacji należą <a href="https://github.com/fritzsedlazeck/Sniffles">Sniffles</a>, <a href="https://github.com/tjiangHIT/cuteSV">cuteSV</a>, <a href="https://github.com/eldariont/svim">SVIM</a> czy <a href="https://github.com/PacificBiosciences/pbsv">PBSV</a> (Pacbio).</p>
+<p><img src="https://media.springernature.com/lw685/springer-static/image/art%3A10.1186%2Fs13059-019-1828-7/MediaObjects/13059_2019_1828_Fig1_HTML.png?" alt="SR vs LR SV calling"></p>
+<p><em><a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1828-7">https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1828-7</a></em></p>
+<hr>
+<h4 id="przykład-identyfikacji-sv-za-pomocą-sniffles2">Przykład identyfikacji SV za pomocą Sniffles2</h4>
+<p>Zasymulujmy długie odczyty:</p>
+<pre><code>badread simulate --reference seq_l.fa --quantity 20x &gt; nanopore_l.fq
+</code></pre>
+<p>Przeprowadźmy kontrolę jakości:</p>
+<pre><code>nanoQC nanopore_l.fq -o raw
+</code></pre>
+<p>Przycinanie adapterów:</p>
+<pre><code>porechop -i nanopore_l.fq -o nanopore_l_trimmed.fq
+</code></pre>
+<p>Filtrowanie i kontrola jakości:</p>
+<pre><code>filtlong --min_length 1000 --keep_percent 90 nanopore_l_trimmed.fq &gt; nanopore_clean.fq
+nanoQC nanopore_clean.fq -o post_filter
+seqkit stats nanopore_l.fq
+seqkit stats nanopore_clean.fq
+</code></pre>
+<p>To w jaki sposób zmapowane są nasze odczyty będzie bezpośrednio wpływało na wynik identyfikacji wariantów. Do identyfikacji wariantów strukturalnych możemy wykorzystać <em>Minimap2</em>, jednak w wielu przypadkach dokładniejszy okazuje się być wolniejszy <em><a href="https://github.com/philres/ngmlr">ngmlr</a></em>.</p>
+<p>Mapowanie przy pomocy <code>minimap2</code>:</p>
+<pre><code>minimap2 -t 10 -R '@RG\tID:1\tSM:1' -ax map-ont seq.fa nanopore_l.fq|samtools sort &gt; nanopore_l.bam &amp;&amp; samtools index nanopore_l.bam
+</code></pre>
+<p>Variant calling przy użyciu <code>Sniffles2</code>:</p>
+<pre><code>sniffles --i nanopore_l.bam --reference seq.fa --vcf sniff_sv.vcf --all-contigs  --allow-overwrite 
+</code></pre>
+<blockquote>
+<p>Domyślnie <em>Sniffles</em> pomija małe contigi. Aby nasz zasymulowany chromosom stał się widzialny, musimy skorzystać&nbsp;z <code>--all-contigs</code>.</p>
+</blockquote>
+<hr>
+<h3 id="porównywanie-wariantów-strukturalnych">Porównywanie wariantów strukturalnych</h3>
+<p>W porównaniu do małych wariantów, warianty strukturalne są często mniej jednoznaczne i mogą wymagać większej elastyczności w procesie ich analizy. Aby porównać warianty wykryte przez różne narzędzia lub zestawy danych, możemy użyć narzędzia SURVIVOR, które umożliwia łączenie wyników z różnych źródeł oraz ich filtrowanie na podstawie takich parametrów jak odległość, typ czy orientacja.</p>
+<p>Wyciągnijmy sumę (union) dwóch zbiorów. Wariant traktowany jest jako ten sam, jeżeli znajduje się w odległości 1000 bp, ma taki sam typ i orientację. Dodatkowo odfiltrowywane są warianty krótsze niż 10 bp.</p>
+<pre><code>SURVIVOR merge &lt;(ls *sv.vcf) 1000 2 1 1 0 10 merged_svs.vcf
+cat merged_svs.vcf|grep ^\# -v|wc -l
+</code></pre>
+<p>Mniej restrykcyjnie:</p>
+<pre><code>SURVIVOR merge &lt;(ls *sv.vcf)  100 1 1 0 0 0 merged_svs.vcf
+</code></pre>
+<p>Dzięki binarnej adnotacji SUPP_VEC możemy wyciągnąć warianty charakterystyczne dla poszczególnych zbiorów:</p>
+<pre><code>cat merged_svs.vcf |grep SUPP_VEC=10|wc -l
+</code></pre>
+<hr>
+<h3 id="inne-technologie-do-identyfikacji-sv">Inne technologie do identyfikacji SV</h3>
+<p>Oprócz technologii sekwencjonowania trzeciej generacji (PacBio, Oxford Nanopore), istnieje szereg innych metod umożliwiających identyfikację wariantów strukturalnych (SV) w genomie. Wśród nich wyróżniają się mikromacierze, które są stosowane do detekcji zmian liczby kopii (CNV), oraz mapy optyczne, takie jak te uzyskiwane przy użyciu systemu Bionano Saphyr.</p>
+<hr>
+<h4 id="mikromacierze">Mikromacierze</h4>
+<p>Mikromacierze to jedna z technologii wykorzystywanych do wykrywania wariantów strukturalnych, szczególnie w kontekście zmian liczby kopii (CNV). Metoda ta jest oparta na hybrydyzacji próbki DNA z zestawem sond, które rozpoznają określone regiony genomu. Dzięki analizie intensywności sygnałów uzyskanych z hybrydyzacji, możliwe jest zidentyfikowanie obszarów, w których nastąpiła zmiana liczby kopii DNA. Mikromacierze oferują dużą przepustowość i mogą być stosowane do analizy wielu próbek jednocześnie, co czyni je popularnym narzędziem w diagnostyce klinicznej i badaniach genomowych.</p>
+<p>Więcej informacji na temat detekcji CNV za pomocą mikromacierzy można znaleźć w <a href="https://www.illumina.com/Documents/products/technotes/technote_cytoanalysis.pdf">dokumentacji Illumina Infinium</a></p>
+<hr>
+<h3 id="mapy-optyczne">Mapy optyczne</h3>
+<p>Bionano Genomics oferuje system Saphyr (z którym spotkaliśmy się już w kontekście scaffoldingu), wykorzystujący technologię mapowania optycznego do wykrywania dużych wariantów strukturalnych w genomach. Proces ten polega na tworzeniu odwzorowań długich fragmentów DNA przy wykorzystaniu specyficznych sond, które są następnie mapowane na genomie referencyjnym. Saphyr pozwala na wykrywanie bardzo dużych wariantów, takich jak translokacje, inwersje, oraz kompleksowe zmiany liczby kopii, które mogą być trudne do wykrycia przy użyciu tradycyjnych metod sekwencjonowania.</p>
+<p><a href="https://www.youtube.com/watch?v=S2ng6glu04I">Mapy optyczne (Bionano Saphyr)</a><br>
+<img src="https://bionanogenomics.com/wp-content/uploads/2020/06/Saphyr-Workflow-2020_RGB-2_1380x900.png" alt="enter image description here"></p>
+<p><em><a href="http://bionanogenomics.com">bionanogenomics.com</a></em></p>
+<hr>
+</div>
+</body>
+
+</html>
